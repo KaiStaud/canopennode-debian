@@ -8,6 +8,8 @@
 %:
 	dh $@  
 	git config --global --add safe.directory /hdd/pbuilding/canopennode-debian 
-	#override_dh_auto_configure:
+	cmake -Bbuild
+override_dh_auto_configure:
+	rm -r build
 #	dh_auto_configure -- \
 #	      -DCMAKE_LIBRARY_ARCHITECTURE="$(DEB_TARGET_MULTIARCH)"
