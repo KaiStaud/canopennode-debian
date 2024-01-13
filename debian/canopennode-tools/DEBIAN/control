@@ -1,0 +1,11 @@
+Package: canopennode-tools
+Source: co-driver
+Version: 1.0.0-1
+Architecture: amd64
+Maintainer: root <>
+Installed-Size: 208
+Section: unknown
+Priority: optional
+Multi-Arch: foreign
+Homepage: <insert the upstream URL, if relevant>
+Description: cli tools for interfacing CO-Network
