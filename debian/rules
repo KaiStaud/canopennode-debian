@@ -8,7 +8,9 @@
 %:
 	dh $@  
 	git config --global --add safe.directory /hdd/pbuilding/canopennode-debian 
+override_dh_auto_build:
 	cmake -Bbuild
+	make -C build
 override_dh_auto_configure:
 	rm -r build
 #	dh_auto_configure -- \
