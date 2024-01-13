@@ -7,7 +7,7 @@
 
 %:
 	dh $@  
-	git config --global --add safe.directory /hdd/CO_Driver
-#override_dh_auto_configure:
+	git config --global --add safe.directory /hdd/pbuilding/canopennode-debian 
+	#override_dh_auto_configure:
 #	dh_auto_configure -- \
 #	      -DCMAKE_LIBRARY_ARCHITECTURE="$(DEB_TARGET_MULTIARCH)"
