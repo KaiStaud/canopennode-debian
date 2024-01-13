@@ -7,9 +7,7 @@
 
 %:
 	dh $@  
-	git config --global --add safe.directory /hdd/co_driver-1.0.0
-	cmake -Bbuild
-	make -C build
+	git config --global --add safe.directory /hdd/CO_Driver
 #override_dh_auto_configure:
 #	dh_auto_configure -- \
 #	      -DCMAKE_LIBRARY_ARCHITECTURE="$(DEB_TARGET_MULTIARCH)"

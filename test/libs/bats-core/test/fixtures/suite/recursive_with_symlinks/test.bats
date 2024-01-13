@@ -1,1 +1,3 @@
-../recursive/test.bats
+@test "a passing test" {
+  true
+}
