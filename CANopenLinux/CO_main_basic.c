@@ -43,7 +43,6 @@
 #include "CO_epoll_interface.h"
 #include "CO_storageLinux.h"
 
-#include "shmem/doubler.h"
 /* Include optional external application functions */
 #ifdef CO_USE_APPLICATION
 #include "CO_application.h"
@@ -53,7 +52,7 @@
 #if (CO_CONFIG_TRACE) & CO_CONFIG_TRACE_ENABLE
 #include "CO_time_trace.h"
 #endif
-#include "../demo/hello-tp.h"
+
 
 /* Interval of mainline and real-time thread in microseconds */
 #ifndef MAIN_THREAD_INTERVAL_US
@@ -132,24 +131,6 @@ CO_epoll_t epRT;
 static void* rt_thread(void* arg);
 #endif
 
-/* Thread to increment i32 PDO-Variable */
-void* counter_thread(void * arg)
-{
-
-while(access("/dev/shm/shmem-example", 0) != 0);
-open_ro_od();
-open_wo_od();
-
-while(1){
-for (int i=0;i<1000;i++){
-access_shared_od();
-create_shared_wo_od(i);
-OD_RAM.x2110_variableInt32[0]=i;
-//lttng_ust_tracepoint(hello_world, counter_thread_tracepoint, i,"counter thread");
-usleep(500000);
-}
-}
-}
 /* Signal handler */
 volatile sig_atomic_t CO_endProgram = 0;
 static void sigHandler(int sig) {
@@ -287,7 +268,7 @@ printf(
 /*******************************************************************************
  * Mainline thread
  ******************************************************************************/
-int co_main (int argc, char *argv[]) {
+int main (int argc, char *argv[]) {
     int programExit = EXIT_SUCCESS;
     CO_epoll_t epMain;
 #ifndef CO_SINGLE_THREAD
@@ -745,10 +726,8 @@ int co_main (int argc, char *argv[]) {
         reset = CO_RESET_NOT;
 
         log_printf(LOG_INFO, DBG_CAN_OPEN_INFO, CO_activeNodeId, "running ...");
-        
-        /* start PDO Counter*/
-        pthread_t counterID;
-        pthread_create(&counterID,NULL,&counter_thread,NULL);
+
+
         while(reset == CO_RESET_NOT && CO_endProgram == 0) {
 /* loop for normal program execution ******************************************/
             CO_epoll_wait(&epMain);

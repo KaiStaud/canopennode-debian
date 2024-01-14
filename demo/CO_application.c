@@ -22,7 +22,7 @@
  * limitations under the License.
  */
 
-#include "hello-tp.h"
+
 #include "CO_application.h"
 #include "OD.h"
 #include "peripheral.h"
@@ -119,7 +119,6 @@ void app_programRt(CO_t *co, uint32_t timer1usDiff) {
     /* static variable is like global: initialized to 0, then keeps its value */
     static int32_t value_old = 0;
     int32_t value_current = OD_RAM.x2110_variableInt32[0];
-//lttng_ust_tracepoint(hello_world, rt_thread_tracepoint, value_current,"counter thread");
 
     /* Detect change of state and trigger TPDO. Of course, variable must be
      * mapped to event driven TPDO for this to have effect. */

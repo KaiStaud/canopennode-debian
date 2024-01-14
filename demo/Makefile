@@ -42,7 +42,8 @@ SOURCES = \
 	$(APPL_SRC)/CO_identificators.c \
 	$(APPL_SRC)/objectAccessOD.c \
 	$(APPL_SRC)/domainDemo.c \
-	$(DRV_SRC)/CO_main_basic.c \
+	$(DRV_SRC)/CO_main_basic.c
+
 
 OBJS = $(SOURCES:%.c=%.o)
 CC ?= gcc
@@ -57,14 +58,12 @@ OPT += -g
 CFLAGS = -Wall -DCO_SW_VERSION=\"$(GIT_VERSION)\" -DCO_DRIVER_CUSTOM $(OPT) $(INCLUDE_DIRS)
 LDFLAGS =
 LDFLAGS += -g
-LDFLAGS += -pthread hello-tp.o -llttng-ust  -Wl,--no-as-needed -ldl
+LDFLAGS += -pthread
 
 #Options can be also passed via make: 'make OPT="-g" LDFLAGS="-pthread"'
 
 
 .PHONY: all clean
-#lib: 
-#	gcc -c -I. hello-tp.c
 
 all: clean $(LINK_TARGET)
 
@@ -72,7 +71,6 @@ clean:
 	rm -f $(OBJS) $(LINK_TARGET)
 
 %.o: %.c
-	$(CC) -c -I. hello-tp.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(LINK_TARGET): $(OBJS)

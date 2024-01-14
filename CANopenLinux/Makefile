@@ -57,7 +57,7 @@ OPT += -DCO_SINGLE_THREAD
 CFLAGS = -Wall $(OPT) $(INCLUDE_DIRS)
 LDFLAGS =
 LDFLAGS += -g
-LDFLAGS += -pthread
+#LDFLAGS += -pthread
 
 #Options can be also passed via make: 'make OPT="-g" LDFLAGS="-pthread"'
 

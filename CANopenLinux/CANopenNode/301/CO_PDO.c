@@ -243,7 +243,7 @@ static ODR_t OD_write_PDO_mapping(OD_stream_t *stream, const void *buf,
 
     /* PDO must be disabled before mapping configuration */
     if (PDO->valid || (PDO->mappedObjectsCount != 0 && stream->subIndex > 0)) {
-        return ODR_INVALID_VALUE;
+        return ODR_UNSUPP_ACCESS;
     }
 
     if (stream->subIndex == 0) {
@@ -251,7 +251,7 @@ static ODR_t OD_write_PDO_mapping(OD_stream_t *stream, const void *buf,
         size_t pdoDataLength = 0;
 
         if (mappedObjectsCount > CO_PDO_MAX_MAPPED_ENTRIES) {
-            return ODR_INVALID_VALUE;
+            return ODR_MAP_LEN;
         }
 
         /* validate enabled mapping parameters */
@@ -540,7 +540,7 @@ static ODR_t OD_write_14xx(OD_stream_t *stream, const void *buf,
          * enabling the PDO */
         if ((COB_ID & 0x3FFFF800) != 0
             || (valid && PDO->valid && CAN_ID != PDO->configuredCanId)
-            || (valid && CAN_ID == 0)
+            || (valid && CO_IS_RESTRICTED_CAN_ID(CAN_ID))
             || (valid && PDO->mappedObjectsCount == 0)
         ) {
             return ODR_INVALID_VALUE;
@@ -811,7 +811,7 @@ void CO_RPDO_process(CO_RPDO_t *RPDO,
         bool_t rpdoReceived = false;
         while (CO_FLAG_READ(RPDO->CANrxNew[bufNo])) {
             rpdoReceived = true;
-            uint8_t *dataRPDO = &RPDO->CANrxData[0][bufNo];
+            uint8_t *dataRPDO = RPDO->CANrxData[bufNo];
 
             /* Clear the flag. If between the copy operation CANrxNew is set
              * by receive thread, then copy the latest data again. */
@@ -897,7 +897,7 @@ void CO_RPDO_process(CO_RPDO_t *RPDO,
                                 CO_EMC_RPDO_TIMEOUT, RPDO->timeoutTimer);
                 }
             }
- #if (CO_CONFIG_SYNC) & CO_CONFIG_FLAG_TIMERNEXT
+ #if (CO_CONFIG_PDO) & CO_CONFIG_FLAG_TIMERNEXT
             if (timerNext_us != NULL
                 && RPDO->timeoutTimer < RPDO->timeoutTime_us
             ) {
@@ -965,7 +965,7 @@ static ODR_t OD_write_18xx(OD_stream_t *stream, const void *buf,
          * enabling the PDO */
         if ((COB_ID & 0x3FFFF800) != 0
             || (valid && PDO->valid && CAN_ID != PDO->configuredCanId)
-            || (valid && CAN_ID == 0)
+            || (valid && CO_IS_RESTRICTED_CAN_ID(CAN_ID))
             || (valid && PDO->mappedObjectsCount == 0)
         ) {
             return ODR_INVALID_VALUE;
@@ -1178,8 +1178,8 @@ CO_ReturnError_t CO_TPDO_init(CO_TPDO_t *TPDO,
     uint16_t eventTime = 0;
     odRet = OD_get_u16(OD_18xx_TPDOCommPar, 3, &inhibitTime, true);
     odRet = OD_get_u16(OD_18xx_TPDOCommPar, 5, &eventTime, true);
-    TPDO->inhibitTime_us = inhibitTime * 100;
-    TPDO->eventTime_us = eventTime * 1000;
+    TPDO->inhibitTime_us = (uint32_t)inhibitTime * 100;
+    TPDO->eventTime_us = (uint32_t)eventTime * 1000;
 #endif
 
 
@@ -1266,8 +1266,8 @@ static CO_ReturnError_t CO_TPDOsend(CO_TPDO_t *TPDO) {
         /* swap multibyte data if big-endian */
  #ifdef CO_BIG_ENDIAN
         if ((stream->attribute & ODA_MB) != 0) {
-            uint8_t *lo = dataOD;
-            uint8_t *hi = dataOD + ODdataLength - 1;
+            uint8_t *lo = dataTPDOCopy;
+            uint8_t *hi = dataTPDOCopy + ODdataLength - 1;
             while (lo < hi) {
                 uint8_t swap = *lo;
                 *lo++ = *hi;
@@ -1323,8 +1323,11 @@ void CO_TPDO_process(CO_TPDO_t *TPDO,
                      bool_t NMTisOperational,
                      bool_t syncWas)
 {
-    (void) syncWas; (void) timerNext_us;
     CO_PDO_common_t *PDO = &TPDO->PDO_common;
+#if ((CO_CONFIG_PDO) & CO_CONFIG_TPDO_TIMERS_ENABLE)
+    (void) timerNext_us;
+#endif
+    (void) syncWas;
 
     if (PDO->valid && NMTisOperational) {
 
@@ -1411,7 +1414,8 @@ void CO_TPDO_process(CO_TPDO_t *TPDO,
                         TPDO->syncCounter = 254;
                     }
                     else {
-                        TPDO->syncCounter = TPDO->transmissionType;
+                        /* Send first TPDO somewhere in the middle */
+                        TPDO->syncCounter = TPDO->transmissionType / 2 + 1;
                     }
                 }
                 /* If the syncStartValue is in use, start first TPDO after SYNC

@@ -9,8 +9,8 @@
 	dh $@  
 	git config --global --add safe.directory $(PWD) 
 override_dh_auto_build:
-	cmake -Bbuild
-	make -C build
+	make -C CANopenNode/CANopenLinux
+	make -C CANopenNode/CANopenLinux/cocomm
 override_dh_auto_configure:
 #	rm -r build
 #	dh_auto_configure -- \

@@ -418,16 +418,15 @@ typedef struct {
  * variable. CO_LOCK_OD(CAN_MODULE) and CO_UNLOCK_OD(CAN_MODULE) macros
  * are used to protect:
  * - Whole real-time thread,
- * - SDO server protects read/write access to OD variable, if specific OD
- *   variable has ODA_TRPDO or ODA_TRSRDO from @ref OD_attributes_t set. If
- *   those attributes are not set, OD variable is not locked by SDO server.
+ * - SDO server protects read/write access to OD variable.
  *   Locking of long OD variables, not accessible from real-time thread, may
  *   block RT thread.
  * - Any mainline code, which accesses PDO-mappable OD variable, must protect
  *   read/write with locking macros. Use @ref OD_mappable() for check.
  * - Other cases, where non-PDO-mappable OD variable is used inside real-time
  *   thread by some other part of the user application must be considered with
- *   special care.
+ *   special care. Also when there are multiple threads accessing the OD (e.g.
+ *   when using a RTOS), you should always lock the OD.
  *
  * #### Synchronization functions for CAN receive
  * After CAN message is received, it is pre-processed in CANrx_callback(), which
@@ -498,6 +497,22 @@ typedef enum {
     CO_CAN_ID_LSS_SLV = 0x7E4,     /**< 0x7E4, LSS response from slave */
     CO_CAN_ID_LSS_MST = 0x7E5      /**< 0x7E5, LSS request from master */
 } CO_Default_CAN_ID_t;
+
+
+/**
+ * Restricted CAN-IDs
+ *
+ * Macro for verifying 'Restricted CAN-IDs', as specified by standard CiA301.
+ * They shall not be used for SYNC, TIME, EMCY, PDO and SDO.
+ */
+#ifndef CO_IS_RESTRICTED_CAN_ID
+#define CO_IS_RESTRICTED_CAN_ID(CAN_ID) ((CAN_ID) <= 0x7F \
+        || ((CAN_ID) >= 0x101 && (CAN_ID) <= 0x180) \
+        || ((CAN_ID) >= 0x581 && (CAN_ID) <= 0x5FF) \
+        || ((CAN_ID) >= 0x601 && (CAN_ID) <= 0x67F) \
+        || ((CAN_ID) >= 0x6E0 && (CAN_ID) <= 0x6FF) \
+        || (CAN_ID) >= 0x701)
+#endif
 
 
 /**
