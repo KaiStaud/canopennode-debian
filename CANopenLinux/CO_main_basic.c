@@ -43,7 +43,6 @@
 #include "CO_epoll_interface.h"
 #include "CO_storageLinux.h"
 
-#include "shmem/doubler.h"
 /* Include optional external application functions */
 #ifdef CO_USE_APPLICATION
 #include "CO_application.h"
@@ -136,14 +135,9 @@ static void* rt_thread(void* arg);
 void* counter_thread(void * arg)
 {
 
-while(access("/dev/shm/shmem-example", 0) != 0);
-open_ro_od();
-open_wo_od();
 
 while(1){
 for (int i=0;i<1000;i++){
-access_shared_od();
-create_shared_wo_od(i);
 OD_RAM.x2110_variableInt32[0]=i;
 //lttng_ust_tracepoint(hello_world, counter_thread_tracepoint, i,"counter thread");
 usleep(500000);

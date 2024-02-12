@@ -2,7 +2,7 @@ Source: co-driver
 Section: unknown
 Priority: optional
 Maintainer: root <>
-Build-Depends: cmake, debhelper-compat (= 12)
+Build-Depends: cmake, debhelper-compat (= 12), git, g++, ecal, libprotobuf-dev, protobuf-compiler, liblttng-ust-dev,liblttng-ctl-dev
 Standards-Version: 4.5.0
 Homepage: <insert the upstream URL, if relevant>
 

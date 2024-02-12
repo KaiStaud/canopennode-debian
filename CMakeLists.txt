@@ -1,6 +1,8 @@
 project(CO_Demo)
 cmake_minimum_required(VERSION 3.18)
-find_package(iceoryx_posh REQUIRED)
+find_package(eCAL REQUIRED)
+find_package(Protobuf REQUIRED)
+
 set(SOURCES 
 	CANopenLinux/CO_driver.c 
 	CANopenLinux/CO_error.c 
@@ -54,4 +56,6 @@ include_directories(
     CANopenLinux/CANopenNode
 	CANopenNode/example)
 
-target_link_libraries(demoLinuxDevice pthread lttng-ust dl tracepoint-provider libshmem iceoryx_posh::iceoryx_posh)
+target_link_libraries(demoLinuxDevice pthread lttng-ust dl tracepoint-provider
+	eCAL::core
+	protobuf::libprotobuf)
